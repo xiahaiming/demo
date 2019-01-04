@@ -22,10 +22,10 @@ pipeline {
 							try {
 								timeout(time: 20, unit: 'SECONDS') {
 									response = input message: "continue to fucker ?", ok: 'yes'
+								}
 							}
 							catch(err) {
 								response = 'yes'
-
 							}
 
 							try {
@@ -36,11 +36,11 @@ pipeline {
 							catch(err) {
 								echo err
 							}
+
 							finally {
 								echo "step1 go build failure"
 							}
 						}
-						
 					}
 				}
 				stage("===============================2") {

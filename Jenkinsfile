@@ -18,7 +18,16 @@ pipeline {
 				stage("===========1") {
 					steps {
 						script {
-							input message: "continue to fucker ?", ok: 'yes'
+							def response
+							try {
+								timeout(time: 20, unit: 'SECONDS') {
+									response = input message: "continue to fucker ?", ok: 'yes'
+							}
+							catch(err) {
+								response = 'yes'
+
+							}
+
 							try {
 								sh '''
 									go build main.go
@@ -85,16 +94,18 @@ pipeline {
 		}
 
 		stage("deployment") {
-			agent {
-				docker { image 'docker' }
-			}
-			steps {
-				echo "TODO: "
-				sh 'docker version'
-			}
-			post {
-				always {
-					echo "finish stage deploy"
+			timeout(time: 1, unit: 'MINUTES') {
+				agent {
+					docker { image 'docker' }
+				}
+				steps {
+					echo "TODO: "
+					sh 'docker version'
+				}
+				post {
+					always {
+						echo "finish stage deploy"
+					}
 				}
 			}
 		}

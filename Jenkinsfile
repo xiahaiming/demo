@@ -36,10 +36,7 @@ pipeline {
 				}
 				stage("===============================2") {
 					steps {
-						script {
-							job('example') {
-							}
-						}
+						echo "haha"
 					}
 				}
 			}

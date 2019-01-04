@@ -55,8 +55,7 @@ pipeline {
 			steps {
 				echo "TODO"
 				sh '''
-					go env
-					git status
+					go vet
 				'''
 			}
 			post {
@@ -66,10 +65,9 @@ pipeline {
 			}
 		}
 
-		stage("package") {
+		stage("unit test") {
 			steps {
-				echo "TODO"
-				echo "pack into docker"
+				sh 'go test'
 			}
 			post {
 				always {
@@ -78,9 +76,24 @@ pipeline {
 			}
 		}
 
-		stage("deploy") {
+		stage("intergetion test") {
 			steps {
 				echo "TODO: "
+			}
+			post {
+				always {
+					echo "finish stage deploy"
+				}
+			}
+		}
+
+		stage("deployment") {
+			agent {
+				docker { image 'docker' }
+			}
+			steps {
+				echo "TODO: "
+				sh 'docker version'
 			}
 			post {
 				always {

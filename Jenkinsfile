@@ -18,6 +18,7 @@ pipeline {
 				stage("===========1") {
 					steps {
 						script {
+							echo "motherfucker"
 							try {
 								sh '''
 									go build main.go

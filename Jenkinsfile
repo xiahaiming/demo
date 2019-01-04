@@ -18,7 +18,7 @@ pipeline {
 				stage("===========1") {
 					steps {
 						script {
-							input "continue to fucker ?", ok: 'yes'
+							input message: "continue to fucker ?", ok: 'yes'
 							try {
 								sh '''
 									go build main.go
@@ -47,7 +47,6 @@ pipeline {
 			post {
 				always {
 					echo "finish stage build"
-					step([$class: "GitHubCommitStatusSetter", reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/my-org/my-repo"], contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"], errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]], statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ] ]);
 				}
 			}
 		}

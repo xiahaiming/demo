@@ -94,18 +94,16 @@ pipeline {
 		}
 
 		stage("deployment") {
-			timeout(time: 1, unit: 'MINUTES') {
-				agent {
-					docker { image 'docker' }
-				}
-				steps {
-					echo "TODO: "
-					sh 'docker version'
-				}
-				post {
-					always {
-						echo "finish stage deploy"
-					}
+			agent {
+				docker { image 'docker' }
+			}
+			steps {
+				echo "TODO: "
+				sh 'docker version'
+			}
+			post {
+				always {
+					echo "finish stage deploy"
 				}
 			}
 		}

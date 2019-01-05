@@ -26,6 +26,9 @@ pipeline {
 						cmdOutput = echo sh (script:"go test .", returnStdout:true).trim()
 						echo "${cmdOutput}"
 
+						echo "commitID is:"
+						echo "${GIT_COMMIT}"
+
 					}
 					catch(err) {
 						echo err

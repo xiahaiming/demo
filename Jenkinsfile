@@ -93,7 +93,7 @@ pipeline {
 			agent { 
 				kubernetes {
 					label "jenkins-agent-docker" 
-					defaultContainer 'docker:dind'
+					defaultContainer 'docker'
 					customWorkspace "/home/jenkins/workspace/go/src/demo"
 				}
 			}

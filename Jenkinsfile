@@ -54,6 +54,7 @@ pipeline {
 				sh '''
 					docker version
 					docker build -t togo-feeds-server .
+					docker tag togo-feeds-server:latest 492666533052.dkr.ecr.ap-south-1.amazonaws.com/togo.feeds_server:git${GIT_COMMIT}
 					docker images
 				'''
 

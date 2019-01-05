@@ -14,9 +14,18 @@ pipeline {
 			steps {
 				script {
 					try {
-						sh '''
-							go build main.go
-						'''
+						echo "build"
+						cmdOutput = echo sh (script:"go build main.go", returnStdout:true).trim()
+						echo "${cmdOutput}"
+
+						echo "analysis"
+						cmdOutput = echo sh (script:"go vet .", returnStdout:true).trim()
+						echo "${cmdOutput}"
+
+						echo "unit test"
+						cmdOutput = echo sh (script:"go test .", returnStdout:true).trim()
+						echo "${cmdOutput}"
+
 					}
 					catch(err) {
 						echo err
@@ -26,29 +35,6 @@ pipeline {
 					}
 				}
 				
-			}
-		}
-
-		stage("analysis") {
-			agent {
-				kubernetes {
-					label "jenkins-agent"
-					defaultContainer 'golang'
-					customWorkspace "/home/jenkins/workspace/go/src/demo"
-				}
-			}
-
-			steps {
-				echo "TODO"
-				sh '''
-					go env
-					git status
-				'''
-			}
-			post {
-				always {
-					echo "finish stage analysis"
-				}
 			}
 		}
 
@@ -76,6 +62,26 @@ pipeline {
 				}
 			}
 		}
+		
+		stage("deployment for canary") {
+			agent {
+				kubernetes {
+					label "jenkins-agent"
+					defaultContainer 'golang'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
+			}
+
+			steps {
+				echo "TODO"
+			}
+			post {
+				always {
+					echo "finish stage analysis"
+				}
+			}
+		}
+
 	}
 	
 	post {

@@ -2,49 +2,30 @@ pipeline {
 	agent none
 
 	stages {
-		agent {
-			kubernetes {
-				label "jenkins-agent"
-				defaultContainer 'golang'
-				customWorkspace "/home/jenkins/workspace/go/src/demo"
+		stage("build") {
+			agent {
+				kubernetes {
+					label "jenkins-agent"
+					defaultContainer 'golang'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
 			}
-		}
 
-		parallel {
-			stage("build") {
-				steps {
-					script {
-						try {
-							sh '''
-								go build main.go
-							'''
-						}
-						catch(err) {
-							echo err
-						}
-						finally {
-							echo "step1 go build failure"
-						}
+			steps {
+				script {
+					try {
+						sh '''
+							go build main.go
+						'''
 					}
-					
-				}
-			}
-			stage("====build===========2") {
-				steps {
-					script {
-						try {
-							sh '''
-								go build main.go
-							'''
-						}
-						catch(err) {
-							echo err
-						}
-						finally {
-							echo "step3 go build failure"
-						}
+					catch(err) {
+						echo err
+					}
+					finally {
+						echo "step1 go build failure"
 					}
 				}
+				
 			}
 		}
 

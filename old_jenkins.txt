@@ -1,0 +1,9 @@
+sudo docker build -t togo-server-lzw -f feeds.Dockerfile .
+sudo mkdir -p /caches
+sudo docker save -o /caches/togo-server-lzw.tar togo-server-lzw
+
+login="$(aws ecr get-login --no-include-email --region ap-south-1)"
+sudo ${login}
+sudo docker load -i /caches/togo-server-lzw.tar
+sudo docker tag togo-server-lzw:latest 492666533052.dkr.ecr.ap-south-1.amazonaws.com/togo-server-lzw:git${GIT_COMMIT}
+sudo docker push 492666533052.dkr.ecr.ap-south-1.amazonaws.com/togo-server-lzw:git${GIT_COMMIT}

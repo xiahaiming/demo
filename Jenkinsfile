@@ -1,19 +1,99 @@
 pipeline {
-	agent { 
-		kubernetes {
-			label "jenkins-agent-docker" 
-			defaultContainer 'docker'
-			customWorkspace "/home/jenkins/workspace/go/src/demo"
-		}
-	}
+	agent none
 
 	stages {
-		stage("deployment") {
+		stage("build") {
+			agent {
+				kubernetes {
+					label "jenkins-agent"
+					defaultContainer 'golang'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
+			}
+			parallel {
+				stage("build") {
+					steps {
+						script {
+							try {
+								sh '''
+									go build main.go
+								'''
+							}
+							catch(err) {
+								echo err
+							}
+							finally {
+								echo "step1 go build failure"
+							}
+						}
+						
+					}
+				}
+				stage("====build===========2") {
+					steps {
+						script {
+							try {
+								sh '''
+									go build main.go
+								'''
+							}
+							catch(err) {
+								echo err
+							}
+							finally {
+								echo "step3 go build failure"
+							}
+						}
+					}
+				}
+			}
+
+			post {
+				always {
+					echo "finish stage build"
+				}
+			}
+		}
+
+		stage("analysis") {
+			agent {
+				kubernetes {
+					label "jenkins-agent"
+					defaultContainer 'golang'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
+			}
+
 			steps {
-				echo "TODO: "
-				sh 'docker version'
-				sh 'docker build .'
-				sh 'docker images'
+				echo "TODO"
+				sh '''
+					go env
+					git status
+				'''
+			}
+			post {
+				always {
+					echo "finish stage analysis"
+				}
+			}
+		}
+
+		stage("deployment") {
+			agent { 
+				kubernetes {
+					label "jenkins-agent-docker" 
+					defaultContainer 'docker'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
+			}
+
+			steps {
+				sh '''
+					docker version
+					docker build -t togo-feeds-server .
+					docker images
+				'''
+
 			}
 
 			post {

@@ -3,14 +3,14 @@ pipeline {
 
 	stages {
 		stage("build") {
-			agent {
-				kubernetes {
-					label "jenkins-agent"
-					defaultContainer 'golang'
-					customWorkspace "/home/jenkins/workspace/go/src/demo"
-				}
-			}
 			parallel {
+				agent {
+					kubernetes {
+						label "jenkins-agent"
+						defaultContainer 'golang'
+						customWorkspace "/home/jenkins/workspace/go/src/demo"
+					}
+				}
 				stage("build") {
 					steps {
 						script {

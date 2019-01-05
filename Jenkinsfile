@@ -90,16 +90,19 @@ pipeline {
 		}
 
 		stage("deployment") {
-			agent {
-				docker { 
-					image 'docker'
-					label "jenkins-agent" 
+			agent { 
+				kubernetes {
+					label "jenkins-agent-docker" 
+					defaultContainer 'docker'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
 				}
 			}
+
 			steps {
 				echo "TODO: "
 				sh 'docker version'
 			}
+
 			post {
 				always {
 					echo "finish stage deploy"

@@ -12,6 +12,8 @@ pipeline {
 			steps {
 				echo "TODO: "
 				sh 'docker version'
+				sh 'docker build .'
+				sh 'docker images'
 			}
 
 			post {

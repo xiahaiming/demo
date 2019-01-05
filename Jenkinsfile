@@ -1,108 +1,83 @@
 pipeline {
-	agent { 
-		kubernetes {
-			label "jenkins-agent" 
-			defaultContainer 'golang'
-			customWorkspace "/home/jenkins/workspace/go/src/demo"
-		}
-	}
-
-	environment {
-		GOPATH="/go:/home/jenkins/workspace/go"
-		PATH="$PATH:$WORKSPACE/bin:/usr/local/go/bin"
-	}
+	agent none
 
 	stages {
 		stage("build") {
-			parallel {
-				stage("===========1") {
-					steps {
-						script {
-							try {
-								sh '''
-									go build main.go
-								'''
-							}
-							catch(err) {
-								echo err
-							}
-							finally {
-								echo "step1 go build failure"
-							}
-						}
-						
-					}
+			agent {
+				kubernetes {
+					label "jenkins-agent"
+					defaultContainer 'golang'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
 				}
-				stage("===============================2") {
-					steps {
-						script {
-							try {
-								sh '''
+			}
 
-									go build main.go
-								'''
-							}
-							catch(err) {
-								echo err
-							}
-							finally {
-								echo "step3 go build failure"
-							}
-						}
-					}
-				}
-				stage("===================================3") {
-					steps {
-						script {
-							try {
-								sh '''
-									go build main.go
+			steps {
+				script {
+					try {
+						echo "build"
+						cmdOutput = echo sh (script:"go build main.go", returnStdout:true).trim()
+						echo "${cmdOutput}"
 
-								'''
-							}
-							catch(err) {
-								echo err
-							}
-							finally {
-								echo "step3 go build failure"
-							}
-						}
-						
+						echo "analysis"
+						cmdOutput = echo sh (script:"go vet .", returnStdout:true).trim()
+						echo "${cmdOutput}"
+
+						echo "unit test"
+						cmdOutput = echo sh (script:"go test .", returnStdout:true).trim()
+						echo "${cmdOutput}"
+
+						echo "commitID is:"
+						echo "${GIT_COMMIT}"
+
+					}
+					catch(err) {
+						echo err
+					}
+					finally {
+						echo "step1 go build failure"
 					}
 				}
-				stage("===================================4") {
-					steps {
-						script {
-							try {
-								sh '''
-									go build main.go
-								'''
-							}
-							catch(err) {
-								echo err
-							}
-							finally {
-								echo "step4 go build failure"
-							}
-						}
-					}
+				
+			}
+		}
+
+		stage("deployment") {
+			agent { 
+				kubernetes {
+					label "jenkins-agent-docker" 
+					defaultContainer 'docker'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
 				}
+			}
+
+			steps {
+				sh '''
+					docker version
+					docker build -t togo-feeds-server .
+					docker tag togo-feeds-server:latest 492666533052.dkr.ecr.ap-south-1.amazonaws.com/togo.feeds_server:git${GIT_COMMIT}
+					docker images
+				'''
+
 			}
 
 			post {
 				always {
-					echo "finish stage build"
+					echo "finish stage deploy"
 				}
 			}
 		}
+		
+		stage("deployment for canary") {
+			agent {
+				kubernetes {
+					label "jenkins-agent"
+					defaultContainer 'golang'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
+			}
 
-		stage("analysis") {
 			steps {
 				echo "TODO"
-				sh '''
-					go env
-					git status
-				'''
 			}
 			post {
 				always {
@@ -111,28 +86,6 @@ pipeline {
 			}
 		}
 
-		stage("package") {
-			steps {
-				echo "TODO"
-				echo "pack into docker"
-			}
-			post {
-				always {
-					echo "finish stage package"
-				}
-			}
-		}
-
-		stage("deploy") {
-			steps {
-				echo "TODO: "
-			}
-			post {
-				always {
-					echo "finish stage deploy"
-				}
-			}
-		}
 	}
 	
 	post {

@@ -36,10 +36,6 @@ pipeline {
 							catch(err) {
 								echo err
 							}
-
-							finally {
-								echo "step1 go build failure"
-							}
 						}
 					}
 				}
@@ -95,7 +91,10 @@ pipeline {
 
 		stage("deployment") {
 			agent {
-				docker { image 'docker' }
+				docker { 
+					image 'docker'
+					label "jenkins-agent" 
+				}
 			}
 			steps {
 				echo "TODO: "

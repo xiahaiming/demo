@@ -57,7 +57,7 @@ pipeline {
 			
 			when {
 				allOf {
-					expression {parameters.BUILD_TYPE == 'CANARY'}
+					expression {params.BUILD_TYPE == 'CANARY'}
 				}
 			}
 

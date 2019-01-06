@@ -22,6 +22,7 @@ pipeline {
 			}
 
 			steps {
+				sh 'echo env.BRANCH_NAME'
 				script {
 					try {
 						echo "build"
@@ -53,9 +54,14 @@ pipeline {
 		stage("select") {
 			steps {
 				script {
-					timeout(time:4, unit: "SECONDS") {
-						env.BUILD_TYPE = input message: 'build type ?', parameters: 
-							[choice (choices: 'DEBUG\nCANARY\nONLINE', description: '', name : 'BUILD_TYPE')]
+					try {
+						timeout(time:4, unit: "SECONDS") {
+							env.BUILD_TYPE = input message: 'build type ?', parameters: 
+								[choice (choices: 'DEBUG\nCANARY\nONLINE', description: '', name : 'BUILD_TYPE')]
+						}
+					}
+					catch(err) {
+						env.BUILD_TYPE = "DEBUG"
 					}
 				}
 			}

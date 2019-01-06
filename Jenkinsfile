@@ -55,7 +55,6 @@ pipeline {
 		}
 		stage("select") {
 			steps {
-				sh 'printenv'
 				script {
 					try {
 						timeout(time:4, unit: "MINUTES") {
@@ -74,6 +73,7 @@ pipeline {
 			when {
 				allOf {
 					environment name: "BUILD_TYPE", value: "CANARY"
+					env.ghprbSourceBranch = "master"
 				}
 			}
 

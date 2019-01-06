@@ -73,7 +73,7 @@ pipeline {
 			when {
 				allOf {
 					environment name: "BUILD_TYPE", value: "CANARY"
-					env.ghprbSourceBranch = "master"
+					environment name: "ghprbSourceBranch", value: "master"
 				}
 			}
 

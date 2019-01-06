@@ -1,6 +1,9 @@
+#!groovy
 pipeline {
 	agent none
-
+	environment {
+		COMPLETED_MSG = "Build done!"
+	}
 	stages {
 		stage("build") {
 			agent {

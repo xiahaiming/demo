@@ -8,10 +8,8 @@ pipeline {
 
 	parameters {
 		string(defaultValue: '', description: '', name : 'BRANCH_NAME')
-		choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_TYPE')
+		choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_CONFIG')
 	}
-
-
 
 	stages {
 		stage("build") {
@@ -52,12 +50,21 @@ pipeline {
 				
 			}
 		}
+		stage("select") {
+			steps {
+				script {
+					timeout(time:4, unit: "SECONDS") {
+						env.BUILD_TYPE = input message: 'build type ?', parameters: 
+							[choice (choices: 'DEBUG\nCANARY\nONLINE', description: '', name : 'BUILD_TYPE')]
+					}
+				}
+			}
+		}
 
 		stage("deployment") {
-			
 			when {
 				allOf {
-					expression {params.BUILD_TYPE == 'CANARY'}
+					environment name: "BUILD_TYPE", value: "CANARY"
 				}
 			}
 

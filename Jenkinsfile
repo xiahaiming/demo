@@ -93,7 +93,7 @@ pipeline {
 	
 	post {
 		always {
-			sh "echo $COMPLETED_MSG"	
+			echo "$COMPLETED_MSG"	
 		}
 
 		failure {

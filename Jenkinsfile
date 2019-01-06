@@ -6,6 +6,12 @@ pipeline {
 		COMPLETED_MSG = "==> Build done!"
 	}
 
+	parameters {
+		string(defaultValue: '', description: '', name : 'BRANCH_NAME')
+		choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_TYPE')
+	}
+
+
 
 	stages {
 		stage("build") {
@@ -48,10 +54,6 @@ pipeline {
 		}
 
 		stage("deployment") {
-			parameters {
-				string(defaultValue: '', description: '', name : 'BRANCH_NAME')
-				choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_TYPE')
-			}
 			
 			when {
 				allOf {

@@ -22,7 +22,9 @@ pipeline {
 			}
 
 			steps {
-				echo "${env.BRANCH_NAME}"
+				echo "${env.PATH}"
+				echo "${PATH}"
+				sh "printenv"
 				script {
 					try {
 						echo "build"
@@ -53,7 +55,7 @@ pipeline {
 		}
 		stage("select") {
 			steps {
-				
+				sh 'printenv'
 				script {
 					try {
 						timeout(time:4, unit: "MINUTES") {
@@ -85,6 +87,7 @@ pipeline {
 
 			steps {
 				sh '''
+					printenv
 					echo "Kicking off canary build\n"
 					docker version
 					docker build -t togo-feeds-server .

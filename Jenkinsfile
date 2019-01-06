@@ -11,6 +11,11 @@ pipeline {
 		choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_CONFIG')
 	}
 
+	triggers {
+		githubPullRequest {}
+	}
+
+
 	stages {
 		stage("build") {
 			agent {
@@ -20,7 +25,6 @@ pipeline {
 					customWorkspace "/home/jenkins/workspace/go/src/demo"
 				}
 			}
-
 			steps {
 				echo "${env.PATH}"
 				echo "${PATH}"

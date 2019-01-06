@@ -6,6 +6,7 @@ pipeline {
 		COMPLETED_MSG = "==> Build done!"
 	}
 
+
 	stages {
 		stage("build") {
 			agent {
@@ -47,15 +48,14 @@ pipeline {
 		}
 
 		stage("deployment") {
-			timeout(time: 5, unit: 'SECONDS') {
-				response = input message: 'Deploy on canary ?', parameters {
-						string(defaultValue: '', description: '', name : 'BRANCH_NAME')
-						choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_TYPE')
-					}
+			parameters {
+				string(defaultValue: '', description: '', name : 'BRANCH_NAME')
+				choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_TYPE')
 			}
+			
 			when {
 				allOf {
-					expression {response.BUILD_TYPE == 'CANARY'}
+					expression {parameters.BUILD_TYPE == 'CANARY'}
 				}
 			}
 

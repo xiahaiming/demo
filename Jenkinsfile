@@ -1,9 +1,11 @@
 #!groovy
 pipeline {
 	agent none
+
 	environment {
-		COMPLETED_MSG = "Build done!"
+		COMPLETED_MSG = "==> Build done!"
 	}
+
 	stages {
 		stage("build") {
 			agent {
@@ -45,6 +47,18 @@ pipeline {
 		}
 
 		stage("deployment") {
+			timeout(time: 5, unit: 'SECONDS') {
+				response = input message: 'Deploy on canary ?', parameters {
+						string(defaultValue: '', description: '', name : 'BRANCH_NAME')
+						choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_TYPE')
+					}
+			}
+			when {
+				allOf {
+					expression {response.BUILD_TYPE == 'CANARY'}
+				}
+			}
+
 			agent { 
 				kubernetes {
 					label "jenkins-agent-docker" 
@@ -55,17 +69,17 @@ pipeline {
 
 			steps {
 				sh '''
+					echo "Kicking off canary build\n"
 					docker version
 					docker build -t togo-feeds-server .
 					docker tag togo-feeds-server:latest 492666533052.dkr.ecr.ap-south-1.amazonaws.com/togo.feeds_server:git${GIT_COMMIT}
 					docker images
 				'''
-
 			}
 
 			post {
 				always {
-					echo "finish stage deploy"
+					sh "echo $COMPLETED_MSG"
 				}
 			}
 		}

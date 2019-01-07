@@ -72,9 +72,7 @@ pipeline {
 
 		stage("deployment") {
 			when {
-				allOf {
-					environment name: "DEPLOY_TO", value: "CANARY"
-				}
+				environment name: "DEPLOY_TO", value: "CANARY"
 			}
 
 			agent { 

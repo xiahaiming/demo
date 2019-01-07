@@ -70,6 +70,22 @@ pipeline {
 			}
 		}
 
+		stage("debug") {
+			agent { 
+				kubernetes {
+					label "jenkins-agent-docker" 
+					defaultContainer 'docker'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
+			}
+			
+			steps {
+				sh "printenv"
+			}
+		}
+
+		
+
 		stage("deployment") {
 			when {
 				environment name: "DEPLOY_TO", value: "CANARY"
@@ -97,25 +113,6 @@ pipeline {
 			post {
 				always {
 					sh "echo $COMPLETED_MSG"
-				}
-			}
-		}
-		
-		stage("deployment for canary") {
-			agent {
-				kubernetes {
-					label "jenkins-agent"
-					defaultContainer 'golang'
-					customWorkspace "/home/jenkins/workspace/go/src/demo"
-				}
-			}
-
-			steps {
-				echo "TODO"
-			}
-			post {
-				always {
-					echo "finish stage analysis"
 				}
 			}
 		}

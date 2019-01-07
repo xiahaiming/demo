@@ -1,4 +1,14 @@
 #!groovy
+
+def isPullRequest() {
+	if (env.CHANGE_ID) {
+		return true
+	}
+	else {
+		return false
+	}
+}
+
 pipeline {
 	agent none
 
@@ -8,7 +18,7 @@ pipeline {
 
 	parameters {
 		string(defaultValue: '', description: '', name : 'BRANCH_NAME')
-		choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_CONFIG')
+		choice (choices: 'CANARY\nTEST', description: '', name : 'BUILD_CONFIG')
 	}
 
 	stages {
@@ -21,9 +31,6 @@ pipeline {
 				}
 			}
 			steps {
-				echo "${env.PATH}"
-				echo "${PATH}"
-				sh "printenv"
 				script {
 					try {
 						echo "build"
@@ -57,8 +64,8 @@ pipeline {
 				script {
 					try {
 						timeout(time:4, unit: "MINUTES") {
-							env.BUILD_TYPE = input message: 'build type ?', parameters: 
-								[choice (choices: 'DEBUG\nCANARY\nONLINE', description: '', name : 'BUILD_TYPE')]
+							env.DEPLOY_TO = input message: 'do you want to deploy ?', parameters: 
+								[choice (choices: 'DEBUG\nCANARY', description: '', name : 'DEPLOY_TO')]
 						}
 					}
 					catch(err) {
@@ -68,11 +75,36 @@ pipeline {
 			}
 		}
 
-		stage("deployment") {
+		stage("debug") {
+			agent { 
+				kubernetes {
+					label "jenkins-agent-docker" 
+					defaultContainer 'docker'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
+			}
+			
+			steps {
+				sh "printenv"
+				echo "${env.PATH}"
+				echo "${PATH}"
+				sh "printenv"
+				echo "current work directory: "
+				print pwd()
+			}
+		}
+
+
+		stage("deployment on canary") {
 			when {
 				allOf {
-					environment name: "BUILD_TYPE", value: "CANARY"
-					environment name: "ghprbSourceBranch", value: "master"
+					environment name: "DEPLOY_TO", value: "CANARY"
+					expression {
+						isPullRequest()
+					}
+					not {
+						branch 'master'
+					}
 				}
 			}
 
@@ -101,22 +133,30 @@ pipeline {
 				}
 			}
 		}
-		
-		stage("deployment for canary") {
-			agent {
+
+		stage("deployment on production") {
+			when {
+				branch 'master'
+			}
+
+			agent { 
 				kubernetes {
-					label "jenkins-agent"
-					defaultContainer 'golang'
+					label "jenkins-agent-docker" 
+					defaultContainer 'docker'
 					customWorkspace "/home/jenkins/workspace/go/src/demo"
 				}
 			}
 
 			steps {
-				echo "TODO"
+				sh '''
+					printenv
+					echo "Kicking off online build\n"
+				'''
 			}
+
 			post {
 				always {
-					echo "finish stage analysis"
+					sh "echo $COMPLETED_MSG"
 				}
 			}
 		}

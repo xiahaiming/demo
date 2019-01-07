@@ -24,6 +24,8 @@ pipeline {
 				echo "${env.PATH}"
 				echo "${PATH}"
 				sh "printenv"
+				echo "current work directory: "
+				print pwd()
 				script {
 					try {
 						echo "build"
@@ -76,8 +78,10 @@ pipeline {
 					}
 
 					not {
-						environment name: "ghprbSourceBranch", value: "master"
-						environment name: "BRANCH_NAME", value: "master"
+						anyOf {
+							environment name: "ghprbSourceBranch", value: "master"
+							environment name: "BRANCH_NAME", value: "master"
+						}
 					}
 				}
 			}

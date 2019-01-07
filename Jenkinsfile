@@ -8,7 +8,7 @@ pipeline {
 
 	parameters {
 		string(defaultValue: '', description: '', name : 'BRANCH_NAME')
-		choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_CONFIG')
+		choice (choices: 'CANARY\nTEST', description: '', name : 'BUILD_CONFIG')
 	}
 
 	stages {
@@ -57,8 +57,8 @@ pipeline {
 				script {
 					try {
 						timeout(time:4, unit: "MINUTES") {
-							env.BUILD_TYPE = input message: 'build type ?', parameters: 
-								[choice (choices: 'DEBUG\nCANARY\nONLINE', description: '', name : 'BUILD_TYPE')]
+							env.BUILD_TYPE = input message: 'do you want to deploy ?', parameters: 
+								[choice (choices: 'DEBUG\nCANARY', description: '', name : 'DEPLOY_TO')]
 						}
 					}
 					catch(err) {
@@ -71,8 +71,14 @@ pipeline {
 		stage("deployment") {
 			when {
 				allOf {
-					environment name: "BUILD_TYPE", value: "CANARY"
-					environment name: "ghprbSourceBranch", value: "master"
+					allOf {
+						environment name: "DEPLOY_TO", value: "CANARY"
+					}
+
+					anyOf {
+						environment name: "ghprbSourceBranch", value: "master"
+						environment name: "BRANCH_NAME", value: "master"
+					}
 				}
 			}
 

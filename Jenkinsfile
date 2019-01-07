@@ -99,7 +99,9 @@ pipeline {
 			when {
 				allOf {
 					environment name: "DEPLOY_TO", value: "CANARY"
-					environment name: "CHANGE_ID", value: ""
+					expression {
+						isPullRequest()
+					}
 					not {
 						branch 'master'
 					}

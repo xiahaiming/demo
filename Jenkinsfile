@@ -21,11 +21,6 @@ pipeline {
 				}
 			}
 			steps {
-				echo "${env.PATH}"
-				echo "${PATH}"
-				sh "printenv"
-				echo "current work directory: "
-				print pwd()
 				script {
 					try {
 						echo "build"
@@ -81,10 +76,14 @@ pipeline {
 			
 			steps {
 				sh "printenv"
+				echo "${env.PATH}"
+				echo "${PATH}"
+				sh "printenv"
+				echo "current work directory: "
+				print pwd()
 			}
 		}
 
-		
 
 		stage("deployment") {
 			when {

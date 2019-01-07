@@ -1,4 +1,14 @@
 #!groovy
+
+def isPullRequest() {
+	if (env.CHANGE_ID) {
+		return true
+	}
+	else {
+		return false
+	}
+}
+
 pipeline {
 	agent none
 
@@ -85,9 +95,15 @@ pipeline {
 		}
 
 
-		stage("deployment") {
+		stage("deployment on canary") {
 			when {
-				environment name: "DEPLOY_TO", value: "CANARY"
+				allOf {
+					environment name: "DEPLOY_TO", value: "CANARY"
+					environment name: "CHANGE_ID", value: ""
+					not {
+						branch 'master'
+					}
+				}
 			}
 
 			agent { 
@@ -106,6 +122,33 @@ pipeline {
 					docker build -t togo-feeds-server .
 					docker tag togo-feeds-server:latest 492666533052.dkr.ecr.ap-south-1.amazonaws.com/togo.feeds_server:git${GIT_COMMIT}
 					docker images
+				'''
+			}
+
+			post {
+				always {
+					sh "echo $COMPLETED_MSG"
+				}
+			}
+		}
+
+		stage("deployment on production") {
+			when {
+				branch 'master'
+			}
+
+			agent { 
+				kubernetes {
+					label "jenkins-agent-docker" 
+					defaultContainer 'docker'
+					customWorkspace "/home/jenkins/workspace/go/src/demo"
+				}
+			}
+
+			steps {
+				sh '''
+					printenv
+					echo "Kicking off online build\n"
 				'''
 			}
 

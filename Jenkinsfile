@@ -1,5 +1,15 @@
+#!groovy
 pipeline {
 	agent none
+
+	environment {
+		COMPLETED_MSG = "==> Build done!"
+	}
+
+	parameters {
+		string(defaultValue: '', description: '', name : 'BRANCH_NAME')
+		choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_CONFIG')
+	}
 
 	stages {
 		stage("build") {
@@ -10,8 +20,10 @@ pipeline {
 					customWorkspace "/home/jenkins/workspace/go/src/demo"
 				}
 			}
-
 			steps {
+				echo "${env.PATH}"
+				echo "${PATH}"
+				sh "printenv"
 				script {
 					try {
 						echo "build"
@@ -40,8 +52,30 @@ pipeline {
 				
 			}
 		}
+		stage("select") {
+			steps {
+				script {
+					try {
+						timeout(time:4, unit: "MINUTES") {
+							env.BUILD_TYPE = input message: 'build type ?', parameters: 
+								[choice (choices: 'DEBUG\nCANARY\nONLINE', description: '', name : 'BUILD_TYPE')]
+						}
+					}
+					catch(err) {
+						env.BUILD_TYPE = "DEBUG"
+					}
+				}
+			}
+		}
 
 		stage("deployment") {
+			when {
+				allOf {
+					environment name: "BUILD_TYPE", value: "CANARY"
+					environment name: "ghprbSourceBranch", value: "master"
+				}
+			}
+
 			agent { 
 				kubernetes {
 					label "jenkins-agent-docker" 
@@ -52,17 +86,18 @@ pipeline {
 
 			steps {
 				sh '''
+					printenv
+					echo "Kicking off canary build\n"
 					docker version
 					docker build -t togo-feeds-server .
 					docker tag togo-feeds-server:latest 492666533052.dkr.ecr.ap-south-1.amazonaws.com/togo.feeds_server:git${GIT_COMMIT}
 					docker images
 				'''
-
 			}
 
 			post {
 				always {
-					echo "finish stage deploy"
+					sh "echo $COMPLETED_MSG"
 				}
 			}
 		}
@@ -90,7 +125,7 @@ pipeline {
 	
 	post {
 		always {
-			echo "finished"	
+			echo "$COMPLETED_MSG"	
 		}
 
 		failure {

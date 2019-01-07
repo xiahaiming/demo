@@ -59,7 +59,7 @@ pipeline {
 				script {
 					try {
 						timeout(time:4, unit: "MINUTES") {
-							env.BUILD_TYPE = input message: 'do you want to deploy ?', parameters: 
+							env.DEPLOY_TO = input message: 'do you want to deploy ?', parameters: 
 								[choice (choices: 'DEBUG\nCANARY', description: '', name : 'DEPLOY_TO')]
 						}
 					}
@@ -73,9 +73,7 @@ pipeline {
 		stage("deployment") {
 			when {
 				allOf {
-					allOf {
-						environment name: "DEPLOY_TO", value: "CANARY"
-					}
+					environment name: "DEPLOY_TO", value: "CANARY"
 				}
 			}
 

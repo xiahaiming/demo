@@ -11,11 +11,6 @@ pipeline {
 		choice (choices: 'DEBUG\nCANARY\nTEST', description: '', name : 'BUILD_CONFIG')
 	}
 
-	triggers {
-		githubPullRequest {}
-	}
-
-
 	stages {
 		stage("build") {
 			agent {

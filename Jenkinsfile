@@ -81,6 +81,7 @@ pipeline {
 						anyOf {
 							environment name: "ghprbSourceBranch", value: "master"
 							environment name: "BRANCH_NAME", value: "master"
+							environment name: "GIT_BRANCH", value: "master"
 						}
 					}
 				}

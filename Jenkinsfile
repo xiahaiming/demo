@@ -75,7 +75,7 @@ pipeline {
 						environment name: "DEPLOY_TO", value: "CANARY"
 					}
 
-					anyOf {
+					not {
 						environment name: "ghprbSourceBranch", value: "master"
 						environment name: "BRANCH_NAME", value: "master"
 					}
